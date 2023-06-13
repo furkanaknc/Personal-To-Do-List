@@ -99,7 +99,7 @@ app.post("/delete", function(req, res) {
 
   console.log("Deleting item with ID:", checkedItemId);
 
-  List.findOneAndUpdate({ title: listName }, { $pull: { items: { _id: checkedItemId } } })
+  List.findOneAndUpdate({ userId: req.session.userId, title: listName }, { $pull: { items: { _id: checkedItemId } } })
     .then(foundList => {
       if (foundList) {
         console.log("Successfully deleted item from list:", foundList);
@@ -113,6 +113,7 @@ app.post("/delete", function(req, res) {
       console.log(err);
     });
 });
+
 
 app.get("/about", function(req, res){
   res.render("about");
