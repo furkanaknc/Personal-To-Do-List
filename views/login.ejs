@@ -1,0 +1,25 @@
+<%- include("partials/header") -%>
+<main class="login-page">
+  <h2><%= message %></h2>
+  <form action="/login" method="POST">
+    <fieldset>
+      <div class="l-r-box">
+        <div class="l-r-pointer">
+          <legend>Login</legend>
+          <input class="form-control rounded-pill" type="text" name="userMail" placeholder="Your Email">
+          <hr>
+          <input class="form-control rounded-pill" type="password" name="password" id="myInput" placeholder="password">
+          <input type="checkbox" onclick="showPasswordAtFirst()">Show Password
+          <hr>
+          <div class="login-btns">
+            <a class="btn rounded-pill" href="/register">Register</a>
+            <button class="btn rounded-pill" type="submit">Login</button>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</main>
+
+<script type="text/javascript" src="/styles.js"></script>
+<%- include("partials/footer") -%>
