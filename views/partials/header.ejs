@@ -25,19 +25,23 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarToggler">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a href="/login"><button class="btn rounded-pill">LOGIN</button></a>
-          </li>
-          <li class="nav-item">
-            <a href="/logout"><button class="btn rounded-pill">LOGOUT</button></a>
-          </li>
-          <li class="nav-item">
-            <a href="/register"><button class="btn rounded-pill">REGISTER</button></a>
-          </li>
+          <% if (!isAuthenticated) { %>
+            <li class="nav-item">
+              <a href="/login"><button class="btn rounded-pill">LOGIN</button></a>
+            </li>
+            <li class="nav-item">
+              <a href="/register"><button class="btn rounded-pill">REGISTER</button></a>
+            </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a href="/logout"><button class="btn rounded-pill">LOGOUT</button></a>
+            </li>
+          <% } %>
           <li class="nav-item">
             <a href="/about" ><button class="btn rounded-pill">ABOUT</button></a>
           </li>
         </ul>
+        
       </div>
     </div>
 </nav>

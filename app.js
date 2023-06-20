@@ -61,7 +61,7 @@ app.get("/", async (req, res) => {
         await createFirstList.save();
         res.redirect("/");
       } else {
-        res.render("list", { title: foundList[0].title, List: foundList[0] });
+        res.render("list", { title: foundList[0].title, List: foundList[0], isAuthenticated: req.session.loggedIn });
       }
     } catch (err) {
       console.error(err);
@@ -71,6 +71,7 @@ app.get("/", async (req, res) => {
     res.redirect("/login");
   }
 });
+
 
 app.post("/", async (req, res) => {
   try {
@@ -99,7 +100,11 @@ app.post("/delete", function(req, res) {
 
   console.log("Deleting item with ID:", checkedItemId);
 
-  List.findOneAndUpdate({ userId: req.session.userId, title: listName }, { $pull: { items: { _id: checkedItemId } } })
+  Item.deleteOne({ _id: checkedItemId }) // Delete item from Item collection
+    .then(() => {
+      return List.findOneAndUpdate({ userId: req.session.userId, title: listName }, 
+        { $pull: { items: { _id: checkedItemId } } }) // Remove item from List's items array
+    })
     .then(foundList => {
       if (foundList) {
         console.log("Successfully deleted item from list:", foundList);
@@ -115,17 +120,24 @@ app.post("/delete", function(req, res) {
 });
 
 
-app.get("/about", function(req, res){
-  res.render("about");
+
+app.get("/about", function(req, res) {
+  res.render("about", { isAuthenticated: req.session.loggedIn });
 });
+
 
 app.get("/register", (req, res) => {
   if (!req.session.loggedIn) {
-    res.render("register", { title: "Register", message: "Welcome!" });
+    res.render("register", { 
+      title: "Register", 
+      message: "Welcome!", 
+      isAuthenticated: req.session.loggedIn 
+    });
   } else {
     res.redirect("/alert");
   }
 });
+
 
 app.post("/register", async (req, res) => {
   const userMail = req.body.userMail;
@@ -136,11 +148,13 @@ app.post("/register", async (req, res) => {
     res.render("register", {
       title: "Register",
       message: "Password length must be greater than 7!",
+      isAuthenticated: req.session.loggedIn || false 
     });
   } else if (password !== password2) {
     res.render("register", {
       title: "Register",
       message: "Passwords don't match!",
+      isAuthenticated: req.session.loggedIn || false 
     });
   } else {
     try {
@@ -149,6 +163,7 @@ app.post("/register", async (req, res) => {
         res.render("register", {
           title: "Register",
           message: "Email already exists!",
+          isAuthenticated: req.session.loggedIn || false 
         });
       } else {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -160,6 +175,7 @@ app.post("/register", async (req, res) => {
         res.render("login", {
           title: "Register",
           message: "You have successfully registered.",
+          isAuthenticated: false // user is not authenticated after registration
         });
       }
     } catch (err) {
@@ -169,9 +185,10 @@ app.post("/register", async (req, res) => {
   }
 });
 
+
 app.get('/login', (req, res) => {
   if (!req.session.loggedIn) {
-    res.render('login', { title: 'Log-in', message: 'Welcome!' });
+    res.render('login', { title: 'Log-in', message: 'Welcome!', isAuthenticated: req.session.loggedIn || false });
   } else {
     res.redirect('/alert');
   }
@@ -191,17 +208,18 @@ app.post('/login', (req, res) => {
             req.session.userId = user._id;
             res.redirect(`/${user._id}`);
           } else {
-            res.render('login', { title: 'Log-in', message: 'Wrong password' });
+            res.render('login', { title: 'Log-in', message: 'Wrong password', isAuthenticated: req.session.loggedIn || false });
           }
         });
       } else {
-        res.render('login', { title: 'Log-in', message: 'Email is not registered' });
+        res.render('login', { title: 'Log-in', message: 'Email is not registered', isAuthenticated: req.session.loggedIn || false });
       }
     })
     .catch((err) => {
-      res.render('login', { title: 'Log-in', message: 'Email is not registered' });
+      res.render('login', { title: 'Log-in', message: 'Email is not registered', isAuthenticated: req.session.loggedIn || false });
     });
 });
+
 
 app.get('/logout', function(req, res){
   if(req.session) {
@@ -216,8 +234,9 @@ app.get('/logout', function(req, res){
 
 
 app.get("/alert", (req, res) => {
-  res.render("alert", { title: "ALERT" });
+  res.render("alert", { title: "ALERT", isAuthenticated: req.session.loggedIn });
 });
+
 
 app.post("/alert", (req, res) => {
   req.session.loggedIn = false;
@@ -236,9 +255,9 @@ app.get("/:userId", async (req, res) => {
           items: []
         });
         await newList.save();
-        res.render("list", { title: newList.title, List: newList });
+        res.render("list", { title: newList.title, List: newList, isAuthenticated: req.session.loggedIn });
       } else {
-        res.render("list", { title: foundList.title, List: foundList });
+        res.render("list", { title: foundList.title, List: foundList, isAuthenticated: req.session.loggedIn });
       }
     } catch (err) {
       console.error(err);
@@ -248,6 +267,7 @@ app.get("/:userId", async (req, res) => {
     res.redirect("/login");
   }
 });
+
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server started on port 3000");
